@@ -1,5 +1,6 @@
 from functools import reduce
 from collections import defaultdict
+from math import log
 import glob
 
 # REDUCE - reduce(function, iterable, initializer)
@@ -28,9 +29,9 @@ def calculate_tf(file_path):
         words = reduce(lambda acc, char: acc[:-1] + [acc[-1] + char] if char != ' ' else acc + [''], text, [''])
         non_empty_words = [word for word in words if word != '']
 
-        # Filter words len <= 3
+        # Filter words len < 3
         lengthy_words = reduce(
-            lambda acc, word: acc + ([word] if len(word) > 3 else []),  
+            lambda acc, word: acc + ([word] if len(word) >= 3 else []),  
             non_empty_words,
             []  
         )
@@ -54,18 +55,47 @@ def calculate_tf(file_path):
         ))
         
         return tf_values
-
-
-if __name__ == "__main__":
-
-    file_paths = glob.glob('data/*.txt')
-
-    all_tf_values = list(reduce(
+    
+def calculate_all_tf(file_paths):
+    # Concatenate all tf_values
+    return list(reduce(
         lambda acc, file_path: acc + calculate_tf(file_path),  
         file_paths,
         []
     ))
 
-    print(len(all_tf_values))
-    # for tf_value in all_tf_values:
-    #     print(tf_value)
+def calculate_idf(all_tf_values, number_of_files):
+
+    # Count documents containing each word
+    count_word_documents = reduce(
+        lambda freq_dict, item: {**freq_dict, item[1]: freq_dict.get(item[1], 0) + 1},
+        all_tf_values,
+        defaultdict(int)
+    )
+    
+    # CHECK
+    print(list(filter(lambda item: item[1] == 'the', all_tf_values)))
+    print(count_word_documents['the'])
+
+    # Calculate IDF values
+    return list(reduce(
+        lambda acc, item: acc + [(item[0], log(number_of_files / item[1]))],
+        count_word_documents.items(),
+        []
+    ))
+
+if __name__ == "__main__":
+
+    file_paths = glob.glob('data/*.txt')
+
+    # Number of files
+    number_of_files = reduce(lambda acc, _: acc + 1, file_paths, 0)
+
+    # All tf values
+    all_tf_values = calculate_all_tf(file_paths)
+
+    # All idf values
+    all_idf_values = calculate_idf(all_tf_values, number_of_files)
+
+    # for idf in all_idf_values:
+    #     print(idf)
