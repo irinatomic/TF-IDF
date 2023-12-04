@@ -9,14 +9,14 @@ import glob
 # Clean text
 def clean_text(text):
 
-    replacements = {'\'': '', ',': '', '.': '', '!': '', '?': '', '\"': '', '“': '', '(': '', ')': '', '#': '', '@': '', '$': '', '-': '', '’': '', '/': '', '\\': ''}
+    replacements = {'\'': '', ',': '', '.': '', '!': '', '?': '', '\"': '', '“': '', '(': '', ')': '', '#': '', '@': '', '$': '', '-': '', '’': '', '/': '', '\\': '', '\n': ''}
 
     # x - text (accumulator)
     # y - replacements[i] (old, new) (value)
     text = reduce(lambda x, y: x.replace(y[0], y[1]), replacements.items(), text)
 
     text = text.lower()
-    return text
+    return text 
 
 def calculate_tf(file_path):
     with open(file_path, 'r') as file:
@@ -74,13 +74,21 @@ def calculate_idf(all_tf_values, number_of_files):
     )
     
     # CHECK
-    print(list(filter(lambda item: item[1] == 'the', all_tf_values)))
-    print(count_word_documents['the'])
+    # print(list(filter(lambda item: item[1] == 'the', all_tf_values)))
+    # print(count_word_documents['the'])
 
     # Calculate IDF values
     return list(reduce(
         lambda acc, item: acc + [(item[0], log(number_of_files / item[1]))],
         count_word_documents.items(),
+        []
+    ))
+
+def calculate_tf_idf(all_tf_values, all_idf_values):
+    idf_dict = dict(all_idf_values)
+    return list(reduce(
+        lambda result_list, item: result_list + [(item[0], item[1], item[2] * idf_dict.get(item[1], 0))],
+        all_tf_values,
         []
     ))
 
@@ -93,9 +101,17 @@ if __name__ == "__main__":
 
     # All tf values
     all_tf_values = calculate_all_tf(file_paths)
+    print(all_tf_values[0])
 
     # All idf values
     all_idf_values = calculate_idf(all_tf_values, number_of_files)
+    print(all_idf_values[0])
+    
+    # All tf-idf values
+    all_tf_idf_values = calculate_tf_idf(all_tf_values, all_idf_values)
 
-    # for idf in all_idf_values:
-    #     print(idf)
+    # Sort first by files (item[0]) and then descending by value (item[2])
+    sorted_tf_idf_values = sorted(all_tf_idf_values, key=lambda x: (x[0], -x[2]))
+
+    for a in sorted_tf_idf_values:
+        print(a)
