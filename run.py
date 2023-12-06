@@ -27,7 +27,7 @@ def calculate_tf(file_path):
 
         # Char by char (space -> new word, else append to last word)
         words = reduce(lambda acc, char: acc[:-1] + [acc[-1] + char] if char != ' ' else acc + [''], text, [''])
-        non_empty_words = [word for word in words if word != '']
+        non_empty_words = reduce(lambda acc, word: acc + [word] if word != '' else acc, words, [])
 
         # Filter words len < 3
         lengthy_words = reduce(
