@@ -22,6 +22,6 @@ The task involves implementing the TF-IDF (term frequency–inverse document fre
         idf(t) = log(Number of documents in the set / Number of documents where word t appears)
         ```
 
-4. **Calculating TF-IDF Values (4 points)**
+4. **Calculating TF-IDF Values**
     - The result should be in the form of a list of tuples `(word, file identifier, value)`.
     - Sort the list so that all words related to one file appear consecutively, and within each file, by descending TF-IDF values.
